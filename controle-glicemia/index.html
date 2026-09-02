@@ -4,18 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Glicemia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="app-header">
-    <h1>Controle de Glicemia</h1>
-    <p class="subtitle">Registro de medições de ponta de dedo</p>
+    <div class="header-inner">
+      <p class="eyebrow">Diário de ponta de dedo</p>
+      <h1>Controle de Glicemia</h1>
+    </div>
   </header>
 
   <main class="container">
 
+    <section class="lcd-panel" id="lcd-panel" aria-live="polite">
+      <div class="lcd-top">
+        <span class="lcd-context" id="lcd-context">Nenhum registro ainda</span>
+        <span class="lcd-status-pill status-neutral" id="lcd-status">SEM DADOS</span>
+      </div>
+      <div class="lcd-readout">
+        <span class="lcd-value" id="lcd-value">- - -</span>
+        <span class="lcd-unit">mg/dL</span>
+      </div>
+      <div class="lcd-meta" id="lcd-meta">Registre sua primeira medição abaixo</div>
+    </section>
+
     <section class="card">
-      <h2 id="form-title">Novo registro</h2>
+      <div class="card-head">
+        <h2 id="form-title">Novo registro</h2>
+        <p class="card-sub">Café, almoço, jantar ou uma medição extraordinária</p>
+      </div>
       <form id="reading-form" novalidate>
         <input type="hidden" id="reading-id">
 
@@ -56,13 +76,13 @@
 
         <div class="field">
           <label for="value">Glicemia (mg/dL)</label>
-          <input type="number" id="value" min="10" max="800" step="1" required placeholder="Ex: 110">
+          <input type="number" id="value" min="10" max="800" step="1" required placeholder="Ex: 110" inputmode="numeric">
         </div>
 
         <div class="field-row">
           <div class="field">
             <label for="insulin">Dose de insulina (UI) <span class="optional">opcional</span></label>
-            <input type="number" id="insulin" min="0" max="200" step="0.5" placeholder="Ex: 4">
+            <input type="number" id="insulin" min="0" max="200" step="0.5" placeholder="Ex: 4" inputmode="decimal">
           </div>
         </div>
 
@@ -79,7 +99,35 @@
     </section>
 
     <section class="card">
-      <h2>Faixa de referência</h2>
+      <div class="card-head">
+        <h2>Resumo</h2>
+        <p class="card-sub">Visão geral dos seus registros</p>
+      </div>
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <section class="card">
+      <div class="history-header">
+        <div class="card-head">
+          <h2>Histórico</h2>
+          <p class="card-sub">Do mais recente para o mais antigo</p>
+        </div>
+        <select id="filter-category" aria-label="Filtrar histórico por tipo de registro">
+          <option value="all">Todos</option>
+          <option value="cafe">Café da manhã</option>
+          <option value="almoco">Almoço</option>
+          <option value="jantar">Jantar</option>
+          <option value="extra">Extraordinário</option>
+        </select>
+      </div>
+      <div id="history-list"></div>
+    </section>
+
+    <section class="card card-muted">
+      <div class="card-head">
+        <h2>Faixa de referência</h2>
+        <p class="card-sub">Usada para destacar valores baixos e altos</p>
+      </div>
       <div class="field-row">
         <div class="field">
           <label for="low-threshold">Baixo, abaixo de (mg/dL)</label>
@@ -93,28 +141,11 @@
       <button type="button" id="save-thresholds-btn" class="btn btn-secondary">Salvar faixa</button>
     </section>
 
-    <section class="card">
-      <h2>Resumo</h2>
-      <div class="stats" id="stats"></div>
-    </section>
-
-    <section class="card">
-      <div class="history-header">
-        <h2>Histórico</h2>
-        <select id="filter-category">
-          <option value="all">Todos</option>
-          <option value="cafe">Café da manhã</option>
-          <option value="almoco">Almoço</option>
-          <option value="jantar">Jantar</option>
-          <option value="extra">Extraordinário</option>
-        </select>
+    <section class="card card-muted">
+      <div class="card-head">
+        <h2>Backup dos dados</h2>
+        <p class="card-sub">Os registros ficam salvos apenas neste navegador. Faça backup periodicamente.</p>
       </div>
-      <div id="history-list"></div>
-    </section>
-
-    <section class="card">
-      <h2>Backup dos dados</h2>
-      <p class="hint">Os registros ficam salvos apenas neste navegador/dispositivo. Faça backup periodicamente.</p>
       <div class="form-actions">
         <button type="button" id="export-btn" class="btn btn-secondary">Exportar backup (.json)</button>
         <label class="btn btn-secondary file-btn">
@@ -125,6 +156,8 @@
     </section>
 
   </main>
+
+  <footer class="app-footer">Os dados ficam salvos apenas neste navegador — nada é enviado para nenhum servidor.</footer>
 
   <script src="app.js"></script>
 </body>

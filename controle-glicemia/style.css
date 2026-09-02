@@ -1,100 +1,336 @@
+/* ---------------------------------------------------------
+   Tokens — light palette lives on bare :root; dark redefines
+   the same tokens under prefers-color-scheme and [data-theme].
+   --------------------------------------------------------- */
 :root {
   color-scheme: light;
-  --bg: #f2f5f7;
-  --card-bg: #ffffff;
-  --text: #1f2933;
-  --text-muted: #62727b;
-  --border: #dde3e8;
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --secondary-bg: #e8edf1;
-  --secondary-text: #33424c;
-  --success: #1a9c62;
-  --success-bg: #e5f7ee;
-  --warning: #b7791f;
-  --warning-bg: #fdf3dc;
-  --danger: #c0392b;
-  --danger-bg: #fbe6e3;
-  --radius: 10px;
+
+  --bg: #eef2ee;
+  --surface: #ffffff;
+  --surface-2: #e4e9e3;
+  --ink: #16211c;
+  --ink-muted: #56645c;
+  --line: #d7ded6;
+
+  --accent: #0b6e5c;
+  --accent-strong: #085247;
+  --accent-ink: #ffffff;
+  --focus-ring: #0b6e5c66;
+
+  --status-low-fg: #a4271e;
+  --status-low-bg: #fbe6e3;
+  --status-high-fg: #8a5300;
+  --status-high-bg: #fbeed3;
+  --status-ok-fg: #1e7d46;
+  --status-ok-bg: #e3f3e8;
+  --status-neutral-fg: #56645c;
+  --status-neutral-bg: #e4e9e3;
+
+  --lcd-bg: #10201b;
+  --lcd-bg-2: #16302a;
+  --lcd-ink: #d6ffe9;
+  --lcd-ink-dim: #7fae9c;
+
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #0f1512;
+    --surface: #171f1a;
+    --surface-2: #1f2922;
+    --ink: #e9efe9;
+    --ink-muted: #9bab9f;
+    --line: #2b362f;
+
+    --accent: #3fcaa9;
+    --accent-strong: #64d9bd;
+    --accent-ink: #08201a;
+    --focus-ring: #3fcaa980;
+
+    --status-low-fg: #ff9a8f;
+    --status-low-bg: #3a1a16;
+    --status-high-fg: #ffcb70;
+    --status-high-bg: #3a2a0c;
+    --status-ok-fg: #7fe0a0;
+    --status-ok-bg: #123320;
+    --status-neutral-fg: #9bab9f;
+    --status-neutral-bg: #1f2922;
+
+    --lcd-bg: #081310;
+    --lcd-bg-2: #0e211c;
+    --lcd-ink: #bdf5da;
+    --lcd-ink-dim: #5c8a78;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0f1512;
+  --surface: #171f1a;
+  --surface-2: #1f2922;
+  --ink: #e9efe9;
+  --ink-muted: #9bab9f;
+  --line: #2b362f;
+
+  --accent: #3fcaa9;
+  --accent-strong: #64d9bd;
+  --accent-ink: #08201a;
+  --focus-ring: #3fcaa980;
+
+  --status-low-fg: #ff9a8f;
+  --status-low-bg: #3a1a16;
+  --status-high-fg: #ffcb70;
+  --status-high-bg: #3a2a0c;
+  --status-ok-fg: #7fe0a0;
+  --status-ok-bg: #123320;
+  --status-neutral-fg: #9bab9f;
+  --status-neutral-bg: #1f2922;
+
+  --lcd-bg: #081310;
+  --lcd-bg-2: #0e211c;
+  --lcd-ink: #bdf5da;
+  --lcd-ink-dim: #5c8a78;
+}
+
+/* ---------------------------------------------------------
+   Base
+   --------------------------------------------------------- */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
-  color: var(--text);
-  padding-bottom: 40px;
+  color: var(--ink);
+  padding-bottom: 8px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card,
+  .lcd-panel {
+    animation: rise 0.35s ease-out both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .app-header {
-  background: var(--primary);
-  color: #fff;
-  padding: 24px 16px 20px;
-  text-align: center;
+  padding: 28px 16px 44px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+  color: var(--accent-ink);
+}
+
+.header-inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.85;
 }
 
 .app-header h1 {
-  margin: 0 0 4px;
-  font-size: 1.5rem;
-}
-
-.subtitle {
   margin: 0;
-  opacity: 0.9;
-  font-size: 0.9rem;
+  font-size: 1.55rem;
+  font-weight: 700;
+  text-wrap: balance;
 }
 
 .container {
   max-width: 640px;
-  margin: -12px auto 0;
+  margin: -28px auto 0;
   padding: 0 12px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
+.app-footer {
+  max-width: 640px;
+  margin: 24px auto 0;
+  padding: 0 24px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+/* ---------------------------------------------------------
+   LCD panel — the glucometer-screen hero
+   --------------------------------------------------------- */
+.lcd-panel {
+  background: radial-gradient(120% 160% at 15% 0%, var(--lcd-bg-2) 0%, var(--lcd-bg) 70%);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px 22px;
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  color: var(--lcd-ink);
+}
+
+.lcd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.lcd-context {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--lcd-ink-dim);
+  letter-spacing: 0.02em;
+}
+
+.lcd-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.lcd-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1;
+}
+
+.lcd-value {
+  font-family: var(--font-mono);
+  font-size: clamp(2.6rem, 12vw, 3.4rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.lcd-unit {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--lcd-ink-dim);
+}
+
+.lcd-meta {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--lcd-ink-dim);
+}
+
+/* status pill color roles, shared by the LCD panel and history items */
+.status-low {
+  color: var(--status-low-fg);
+  background: var(--status-low-bg);
+}
+
+.status-high {
+  color: var(--status-high-fg);
+  background: var(--status-high-bg);
+}
+
+.status-normal {
+  color: var(--status-ok-fg);
+  background: var(--status-ok-bg);
+}
+
+.status-neutral {
+  color: var(--status-neutral-fg);
+  background: var(--status-neutral-bg);
+}
+
+/* ---------------------------------------------------------
+   Cards
+   --------------------------------------------------------- */
 .card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 18px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
-.card h2 {
-  margin: 0 0 14px;
-  font-size: 1.05rem;
+.card-muted {
+  background: transparent;
+  box-shadow: none;
 }
 
+.card-head {
+  margin-bottom: 14px;
+}
+
+.card-head h2 {
+  margin: 0 0 2px;
+  font-size: 1.02rem;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+.card-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+/* ---------------------------------------------------------
+   Form fields
+   --------------------------------------------------------- */
 .field {
   margin-bottom: 14px;
+}
+
+.field:last-of-type {
+  margin-bottom: 0;
 }
 
 .field-row {
   display: flex;
   gap: 12px;
+  margin-bottom: 14px;
 }
 
 .field-row .field {
   flex: 1;
   min-width: 0;
+  margin-bottom: 0;
 }
 
 label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
   margin-bottom: 6px;
 }
 
 .optional {
   font-weight: 400;
   font-style: italic;
-  color: var(--text-muted);
 }
 
 input[type="date"],
@@ -105,64 +341,86 @@ select,
 textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
-  background: #fff;
-  color: var(--text);
   font-family: inherit;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+input[type="number"] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 textarea {
   resize: vertical;
+  font-family: var(--font-body);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
 }
 
 .radio-group {
   display: flex;
-  gap: 16px;
+  gap: 18px;
+  padding-top: 2px;
 }
 
 .radio-option {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
+  font-size: 0.92rem;
   font-weight: 400;
-  color: var(--text);
+  color: var(--ink);
   margin-bottom: 0;
 }
 
 .radio-option input {
   width: auto;
+  accent-color: var(--accent);
 }
 
 .form-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .btn {
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 11px 18px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: #fff;
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .btn-primary:hover {
-  background: var(--primary-dark);
+  background: var(--accent-strong);
 }
 
 .btn-secondary {
-  background: var(--secondary-bg);
-  color: var(--secondary-text);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.btn-secondary:hover {
+  background: var(--line);
 }
 
 .file-btn {
@@ -177,60 +435,68 @@ textarea {
 
 .hint {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--ink-muted);
   margin-top: 0;
 }
 
+/* ---------------------------------------------------------
+   Stats
+   --------------------------------------------------------- */
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
   gap: 10px;
 }
 
 .stat-box {
-  background: var(--secondary-bg);
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
 }
 
 .stat-box .stat-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
   margin-bottom: 4px;
+  letter-spacing: 0.01em;
 }
 
 .stat-box .stat-value {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
+.empty-state {
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+  text-align: center;
+  padding: 22px 10px;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+}
+
+/* ---------------------------------------------------------
+   History
+   --------------------------------------------------------- */
 .history-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 14px;
-}
-
-.history-header h2 {
-  margin: 0;
+  margin-bottom: 4px;
 }
 
 .history-header select {
   width: auto;
-}
-
-.empty-state {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  text-align: center;
-  padding: 20px 0;
+  flex-shrink: 0;
 }
 
 .reading-item {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 13px 14px;
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
@@ -248,50 +514,39 @@ textarea {
 }
 
 .reading-datetime {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  margin-bottom: 3px;
+  font-variant-numeric: tabular-nums;
 }
 
 .reading-type {
   font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 4px;
+  font-size: 0.94rem;
+  margin-bottom: 6px;
 }
 
 .reading-value {
   display: inline-block;
-  font-size: 1.3rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
-}
-
-.reading-value.normal {
-  color: var(--success);
-  background: var(--success-bg);
-}
-
-.reading-value.low {
-  color: var(--danger);
-  background: var(--danger-bg);
-}
-
-.reading-value.high {
-  color: var(--warning);
-  background: var(--warning-bg);
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 9px;
+  border-radius: var(--radius-sm);
 }
 
 .reading-extra {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: 4px;
+  font-size: 0.83rem;
+  color: var(--ink-muted);
+  margin-top: 6px;
 }
 
 .reading-notes {
   font-size: 0.85rem;
-  color: var(--text);
-  margin-top: 4px;
+  color: var(--ink);
+  margin-top: 6px;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -305,15 +560,21 @@ textarea {
 
 .icon-btn {
   border: none;
-  background: var(--secondary-bg);
-  color: var(--secondary-text);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.8rem;
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 6px 11px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
 }
 
+.icon-btn:hover {
+  background: var(--line);
+}
+
 .icon-btn.danger {
-  background: var(--danger-bg);
-  color: var(--danger);
+  background: var(--status-low-bg);
+  color: var(--status-low-fg);
 }

@@ -17,6 +17,18 @@
     depois: "Depois da refeição"
   };
 
+  var STATUS_PILL_LABELS = {
+    low: "BAIXA",
+    high: "ALTA",
+    normal: "NA FAIXA"
+  };
+
+  var lcdPanel = document.getElementById("lcd-panel");
+  var lcdContext = document.getElementById("lcd-context");
+  var lcdStatus = document.getElementById("lcd-status");
+  var lcdValue = document.getElementById("lcd-value");
+  var lcdMeta = document.getElementById("lcd-meta");
+
   var form = document.getElementById("reading-form");
   var readingIdInput = document.getElementById("reading-id");
   var dateInput = document.getElementById("date");
@@ -245,7 +257,7 @@
           '<div class="reading-type">' +
           escapeHtml(typeLabel(r)) +
           "</div>" +
-          '<span class="reading-value ' +
+          '<span class="reading-value status-' +
           cls +
           '">' +
           r.value +
@@ -269,7 +281,35 @@
     historyList.innerHTML = html;
   }
 
+  function mostRecentReading() {
+    if (readings.length === 0) return null;
+    return readings.slice().sort(function (a, b) {
+      return (b.date + b.time).localeCompare(a.date + a.time);
+    })[0];
+  }
+
+  function renderLcd() {
+    var last = mostRecentReading();
+
+    if (!last) {
+      lcdContext.textContent = "Nenhum registro ainda";
+      lcdStatus.textContent = "SEM DADOS";
+      lcdStatus.className = "lcd-status-pill status-neutral";
+      lcdValue.textContent = "- - -";
+      lcdMeta.textContent = "Registre sua primeira medição abaixo";
+      return;
+    }
+
+    var cls = classifyValue(last.value);
+    lcdContext.textContent = typeLabel(last);
+    lcdStatus.textContent = STATUS_PILL_LABELS[cls];
+    lcdStatus.className = "lcd-status-pill status-" + cls;
+    lcdValue.textContent = last.value;
+    lcdMeta.textContent = formatDateBR(last.date) + " às " + last.time;
+  }
+
   function renderAll() {
+    renderLcd();
     renderStats();
     renderHistory();
   }
@@ -390,21 +430,48 @@
     renderAll();
   });
 
+  function offerBackupDownload(filename, jsonText) {
+    if (window.claude && typeof window.claude.use === "function") {
+      window.claude
+        .use("downloads")
+        .catch(function () {
+          return null;
+        })
+        .then(function (downloads) {
+          if (!downloads) {
+            downloadViaAnchor(filename, jsonText);
+            return;
+          }
+          downloads.save({ filename: filename, data: jsonText }).catch(function (err) {
+            if (!err || err.code !== "declined") {
+              alert("Não foi possível salvar o backup. Tente novamente.");
+            }
+          });
+        });
+      return;
+    }
+    downloadViaAnchor(filename, jsonText);
+  }
+
+  function downloadViaAnchor(filename, jsonText) {
+    var blob = new Blob([jsonText], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   exportBtn.addEventListener("click", function () {
     var payload = {
       exportedAt: new Date().toISOString(),
       settings: settings,
       readings: readings
     };
-    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = "backup-glicemia-" + todayDateStr() + ".json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    offerBackupDownload("backup-glicemia-" + todayDateStr() + ".json", JSON.stringify(payload, null, 2));
   });
 
   importInput.addEventListener("change", function () {
