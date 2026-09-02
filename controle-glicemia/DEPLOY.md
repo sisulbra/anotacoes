@@ -106,10 +106,15 @@ Você já tem a conta (taxa única de US$ 25 já paga). No
 
 1. **Criar app** → preencha nome, idioma, categoria "Saúde e fitness" ou
    "Estilo de vida".
-2. **Política de privacidade**: obrigatória para apps de saúde. Você
-   precisa de uma página pública explicando que os dados ficam só no
-   aparelho e não são coletados por você. Posso redigir esse texto se
-   quiser — me avise.
+2. **Política de privacidade**: já está pronta em
+   `controle-glicemia/privacidade.html`, considerando a LGPD. Antes de
+   publicar, edite o arquivo e troque os dois textos marcados:
+   - `[NOME DO DESENVOLVEDOR/RESPONSÁVEL]` (seção 1);
+   - `[E-MAIL DE CONTATO PARA PRIVACIDADE]` (seção 11).
+
+   Depois do `firebase deploy`, a URL pública dela é
+   `https://SEU-PROJETO.web.app/privacidade.html` — é esse link que vai no
+   campo "Política de privacidade" do Play Console.
 3. **Formulário de segurança dos dados** (Data Safety): declare que o app
    **não coleta nem compartilha dados** (tudo fica local no aparelho).
 4. Envie o `.aab` do passo 4 em **Teste interno** primeiro, teste no seu

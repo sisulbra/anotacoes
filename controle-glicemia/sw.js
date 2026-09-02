@@ -1,10 +1,11 @@
 // Cache do "app shell" para uso offline. Como todos os dados ficam no
 // localStorage do aparelho, o app funciona sem internet depois da
 // primeira visita — só o login com Google exige rede.
-var CACHE_NAME = "glicemia-shell-v3";
+var CACHE_NAME = "glicemia-shell-v4";
 var APP_SHELL = [
   "./",
   "./index.html",
+  "./privacidade.html",
   "./style.css",
   "./theme.js",
   "./storage.js",

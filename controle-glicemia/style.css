@@ -205,6 +205,11 @@ body {
   color: var(--ink-muted);
 }
 
+.app-footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 /* ---------------------------------------------------------
    LCD panel — the glucometer-screen hero
    --------------------------------------------------------- */
@@ -644,6 +649,17 @@ button:focus-visible {
   font-size: 0.88rem;
   color: var(--ink-muted);
   line-height: 1.5;
+}
+
+.signin-consent {
+  margin: -14px 0 20px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.signin-consent a {
+  color: var(--accent);
 }
 
 .signin-label {
