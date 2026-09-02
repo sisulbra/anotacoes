@@ -3,7 +3,7 @@
 
   // Substitua pelo Client ID OAuth (tipo "Aplicativo da Web") criado no
   // Google Cloud Console para este projeto. Veja DEPLOY.md.
-  var GOOGLE_CLIENT_ID = "REPLACE_WITH_YOUR_CLIENT_ID.apps.googleusercontent.com";
+  var GOOGLE_CLIENT_ID = "906989237849-94nsj2phbu2lkuv7kc0l4g8po2h9p35r.apps.googleusercontent.com";
 
   var signinScreen = document.getElementById("signin-screen");
   var appRoot = document.getElementById("app-root");
