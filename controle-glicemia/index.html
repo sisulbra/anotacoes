@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Glicemia</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Controle de Glicemia</h1>
+    <p class="subtitle">Registro de medições de ponta de dedo</p>
+  </header>
+
+  <main class="container">
+
+    <section class="card">
+      <h2 id="form-title">Novo registro</h2>
+      <form id="reading-form" novalidate>
+        <input type="hidden" id="reading-id">
+
+        <div class="field-row">
+          <div class="field">
+            <label for="date">Data</label>
+            <input type="date" id="date" required>
+          </div>
+          <div class="field">
+            <label for="time">Horário</label>
+            <input type="time" id="time" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="category">Registro</label>
+          <select id="category" required>
+            <option value="cafe">Café da manhã</option>
+            <option value="almoco">Almoço</option>
+            <option value="jantar">Jantar</option>
+            <option value="extra">Extraordinário</option>
+          </select>
+        </div>
+
+        <div class="field" id="moment-field">
+          <label>Momento</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="moment" value="antes" checked>
+              <span>Antes da refeição</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="moment" value="depois">
+              <span>Depois da refeição</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="value">Glicemia (mg/dL)</label>
+          <input type="number" id="value" min="10" max="800" step="1" required placeholder="Ex: 110">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="insulin">Dose de insulina (UI) <span class="optional">opcional</span></label>
+            <input type="number" id="insulin" min="0" max="200" step="0.5" placeholder="Ex: 4">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="notes">Observações <span class="optional">opcional</span></label>
+          <textarea id="notes" rows="2" placeholder="Ex: senti tontura, comi fora, etc."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="submit-btn" class="btn btn-primary">Salvar registro</button>
+          <button type="button" id="cancel-edit-btn" class="btn btn-secondary hidden">Cancelar edição</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Faixa de referência</h2>
+      <div class="field-row">
+        <div class="field">
+          <label for="low-threshold">Baixo, abaixo de (mg/dL)</label>
+          <input type="number" id="low-threshold" min="0" max="400" step="1">
+        </div>
+        <div class="field">
+          <label for="high-threshold">Alto, acima de (mg/dL)</label>
+          <input type="number" id="high-threshold" min="0" max="800" step="1">
+        </div>
+      </div>
+      <button type="button" id="save-thresholds-btn" class="btn btn-secondary">Salvar faixa</button>
+    </section>
+
+    <section class="card">
+      <h2>Resumo</h2>
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <section class="card">
+      <div class="history-header">
+        <h2>Histórico</h2>
+        <select id="filter-category">
+          <option value="all">Todos</option>
+          <option value="cafe">Café da manhã</option>
+          <option value="almoco">Almoço</option>
+          <option value="jantar">Jantar</option>
+          <option value="extra">Extraordinário</option>
+        </select>
+      </div>
+      <div id="history-list"></div>
+    </section>
+
+    <section class="card">
+      <h2>Backup dos dados</h2>
+      <p class="hint">Os registros ficam salvos apenas neste navegador/dispositivo. Faça backup periodicamente.</p>
+      <div class="form-actions">
+        <button type="button" id="export-btn" class="btn btn-secondary">Exportar backup (.json)</button>
+        <label class="btn btn-secondary file-btn">
+          Importar backup
+          <input type="file" id="import-input" accept="application/json" class="hidden">
+        </label>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
