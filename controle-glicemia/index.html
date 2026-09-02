@@ -2,163 +2,257 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Controle de Glicemia</title>
+<meta name="description" content="Diário de medições de ponta de dedo para controle do diabetes, com registros por refeição, exportação e múltiplos perfis.">
+<meta name="theme-color" content="#0b6e5c">
+<script>
+  (function () {
+    try {
+      var mode = localStorage.getItem("glicemia_theme_v1");
+      if (mode === "light" || mode === "dark") {
+        document.documentElement.setAttribute("data-theme", mode);
+      }
+    } catch (e) {}
+  })();
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="app-header">
-    <div class="header-inner">
+
+  <!-- ===================== Tela de identificação ===================== -->
+  <section id="signin-screen" class="signin-screen">
+    <div class="signin-card">
       <p class="eyebrow">Diário de ponta de dedo</p>
-      <h1>Controle de Glicemia</h1>
-    </div>
-  </header>
+      <h1 class="signin-title">Controle de Glicemia</h1>
+      <p class="signin-sub">Identifique-se para ver seus próprios registros. Cada pessoa que usar este aparelho tem seu histórico separado.</p>
 
-  <main class="container">
-
-    <section class="lcd-panel" id="lcd-panel" aria-live="polite">
-      <div class="lcd-top">
-        <span class="lcd-context" id="lcd-context">Nenhum registro ainda</span>
-        <span class="lcd-status-pill status-neutral" id="lcd-status">SEM DADOS</span>
+      <div id="known-profiles" class="known-profiles hidden">
+        <p class="signin-label">Continuar como</p>
+        <div id="known-profiles-list" class="known-profiles-list"></div>
       </div>
-      <div class="lcd-readout">
-        <span class="lcd-value" id="lcd-value">- - -</span>
-        <span class="lcd-unit">mg/dL</span>
-      </div>
-      <div class="lcd-meta" id="lcd-meta">Registre sua primeira medição abaixo</div>
-    </section>
 
-    <section class="card">
-      <div class="card-head">
-        <h2 id="form-title">Novo registro</h2>
-        <p class="card-sub">Café, almoço, jantar ou uma medição extraordinária</p>
-      </div>
-      <form id="reading-form" novalidate>
-        <input type="hidden" id="reading-id">
+      <div class="signin-divider" id="signin-divider" style="display:none"><span>ou</span></div>
 
-        <div class="field-row">
-          <div class="field">
-            <label for="date">Data</label>
-            <input type="date" id="date" required>
-          </div>
-          <div class="field">
-            <label for="time">Horário</label>
-            <input type="time" id="time" required>
-          </div>
+      <div id="google-signin-area" class="google-signin-area">
+        <div id="google-signin-btn"></div>
+        <p id="google-signin-note" class="signin-note hidden"></p>
+      </div>
+
+      <div class="signin-divider"><span>ou</span></div>
+
+      <form id="local-profile-form" class="local-profile-form">
+        <label for="local-profile-name">Usar um perfil local neste aparelho</label>
+        <div class="local-profile-row">
+          <input type="text" id="local-profile-name" placeholder="Seu nome" maxlength="40" required autocomplete="name">
+          <button type="submit" class="btn btn-secondary">Entrar</button>
         </div>
+        <p class="signin-hint">Não exige internet nem conta Google. Os dados ficam só neste aparelho.</p>
+      </form>
+    </div>
+  </section>
 
-        <div class="field">
-          <label for="category">Registro</label>
-          <select id="category" required>
+  <!-- ===================== App ===================== -->
+  <div id="app-root" class="hidden">
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="header-text">
+          <p class="eyebrow">Diário de ponta de dedo</p>
+          <h1>Controle de Glicemia</h1>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="theme-toggle" class="icon-toggle-btn" aria-label="Alternar tema claro/escuro">
+            <svg id="theme-icon-light" class="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+            <svg id="theme-icon-dark" class="theme-icon hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"></path></svg>
+            <svg id="theme-icon-system" class="theme-icon hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+            <span id="theme-toggle-label">Sistema</span>
+          </button>
+          <button type="button" id="profile-chip" class="profile-chip">
+            <span id="profile-avatar" class="profile-avatar">?</span>
+            <span id="profile-name" class="profile-name">—</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <section class="lcd-panel" id="lcd-panel" aria-live="polite">
+        <div class="lcd-top">
+          <span class="lcd-context" id="lcd-context">Nenhum registro ainda</span>
+          <span class="lcd-status-pill status-neutral" id="lcd-status">SEM DADOS</span>
+        </div>
+        <div class="lcd-readout">
+          <span class="lcd-value" id="lcd-value">- - -</span>
+          <span class="lcd-unit">mg/dL</span>
+        </div>
+        <div class="lcd-meta" id="lcd-meta">Registre sua primeira medição abaixo</div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2 id="form-title">Novo registro</h2>
+          <p class="card-sub">Café, almoço, jantar ou uma medição extraordinária</p>
+        </div>
+        <form id="reading-form" novalidate>
+          <input type="hidden" id="reading-id">
+
+          <div class="field-row">
+            <div class="field">
+              <label for="date">Data</label>
+              <input type="date" id="date" required>
+            </div>
+            <div class="field">
+              <label for="time">Horário</label>
+              <input type="time" id="time" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="category">Registro</label>
+            <select id="category" required>
+              <option value="cafe">Café da manhã</option>
+              <option value="almoco">Almoço</option>
+              <option value="jantar">Jantar</option>
+              <option value="extra">Extraordinário</option>
+            </select>
+          </div>
+
+          <div class="field" id="moment-field">
+            <label>Momento</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="moment" value="antes" checked>
+                <span>Antes da refeição</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="moment" value="depois">
+                <span>Depois da refeição</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="value">Glicemia (mg/dL)</label>
+            <input type="number" id="value" min="10" max="800" step="1" required placeholder="Ex: 110" inputmode="numeric">
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="insulin">Dose de insulina (UI) <span class="optional">opcional</span></label>
+              <input type="number" id="insulin" min="0" max="200" step="0.5" placeholder="Ex: 4" inputmode="decimal">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="notes">Observações <span class="optional">opcional</span></label>
+            <textarea id="notes" rows="2" placeholder="Ex: senti tontura, comi fora, etc."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="submit-btn" class="btn btn-primary">Salvar registro</button>
+            <button type="button" id="cancel-edit-btn" class="btn btn-secondary hidden">Cancelar edição</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Resumo</h2>
+          <p class="card-sub">Visão geral dos seus registros</p>
+        </div>
+        <div class="stats" id="stats"></div>
+      </section>
+
+      <section class="card">
+        <div class="history-header">
+          <div class="card-head">
+            <h2>Histórico</h2>
+            <p class="card-sub">Do mais recente para o mais antigo</p>
+          </div>
+          <select id="filter-category" aria-label="Filtrar histórico por tipo de registro">
+            <option value="all">Todos</option>
             <option value="cafe">Café da manhã</option>
             <option value="almoco">Almoço</option>
             <option value="jantar">Jantar</option>
             <option value="extra">Extraordinário</option>
           </select>
         </div>
+        <div id="history-list"></div>
+      </section>
 
-        <div class="field" id="moment-field">
-          <label>Momento</label>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="moment" value="antes" checked>
-              <span>Antes da refeição</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="moment" value="depois">
-              <span>Depois da refeição</span>
-            </label>
-          </div>
+      <section class="card card-muted">
+        <div class="card-head">
+          <h2>Faixa de referência</h2>
+          <p class="card-sub">Usada para destacar valores baixos e altos</p>
         </div>
-
-        <div class="field">
-          <label for="value">Glicemia (mg/dL)</label>
-          <input type="number" id="value" min="10" max="800" step="1" required placeholder="Ex: 110" inputmode="numeric">
-        </div>
-
         <div class="field-row">
           <div class="field">
-            <label for="insulin">Dose de insulina (UI) <span class="optional">opcional</span></label>
-            <input type="number" id="insulin" min="0" max="200" step="0.5" placeholder="Ex: 4" inputmode="decimal">
+            <label for="low-threshold">Baixo, abaixo de (mg/dL)</label>
+            <input type="number" id="low-threshold" min="0" max="400" step="1">
+          </div>
+          <div class="field">
+            <label for="high-threshold">Alto, acima de (mg/dL)</label>
+            <input type="number" id="high-threshold" min="0" max="800" step="1">
           </div>
         </div>
+        <button type="button" id="save-thresholds-btn" class="btn btn-secondary">Salvar faixa</button>
+      </section>
 
-        <div class="field">
-          <label for="notes">Observações <span class="optional">opcional</span></label>
-          <textarea id="notes" rows="2" placeholder="Ex: senti tontura, comi fora, etc."></textarea>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" id="submit-btn" class="btn btn-primary">Salvar registro</button>
-          <button type="button" id="cancel-edit-btn" class="btn btn-secondary hidden">Cancelar edição</button>
-        </div>
-      </form>
-    </section>
-
-    <section class="card">
-      <div class="card-head">
-        <h2>Resumo</h2>
-        <p class="card-sub">Visão geral dos seus registros</p>
-      </div>
-      <div class="stats" id="stats"></div>
-    </section>
-
-    <section class="card">
-      <div class="history-header">
+      <section class="card card-muted">
         <div class="card-head">
-          <h2>Histórico</h2>
-          <p class="card-sub">Do mais recente para o mais antigo</p>
+          <h2>Exportar e fazer backup</h2>
+          <p class="card-sub">Os registros ficam salvos apenas neste aparelho. Exporte periodicamente.</p>
         </div>
-        <select id="filter-category" aria-label="Filtrar histórico por tipo de registro">
-          <option value="all">Todos</option>
-          <option value="cafe">Café da manhã</option>
-          <option value="almoco">Almoço</option>
-          <option value="jantar">Jantar</option>
-          <option value="extra">Extraordinário</option>
-        </select>
-      </div>
-      <div id="history-list"></div>
-    </section>
-
-    <section class="card card-muted">
-      <div class="card-head">
-        <h2>Faixa de referência</h2>
-        <p class="card-sub">Usada para destacar valores baixos e altos</p>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="low-threshold">Baixo, abaixo de (mg/dL)</label>
-          <input type="number" id="low-threshold" min="0" max="400" step="1">
+        <div class="export-grid">
+          <button type="button" id="export-json-btn" class="export-btn">
+            <span class="export-btn-format">JSON</span>
+            <span class="export-btn-desc">Backup completo, para restaurar depois</span>
+          </button>
+          <button type="button" id="export-csv-btn" class="export-btn">
+            <span class="export-btn-format">Planilha (.csv)</span>
+            <span class="export-btn-desc">Abre no Excel, Sheets ou Numbers</span>
+          </button>
+          <button type="button" id="export-txt-btn" class="export-btn">
+            <span class="export-btn-format">Texto (.txt)</span>
+            <span class="export-btn-desc">Relatório simples para ler ou enviar</span>
+          </button>
+          <button type="button" id="export-doc-btn" class="export-btn">
+            <span class="export-btn-format">Word (.doc)</span>
+            <span class="export-btn-desc">Relatório formatado em tabela</span>
+          </button>
         </div>
-        <div class="field">
-          <label for="high-threshold">Alto, acima de (mg/dL)</label>
-          <input type="number" id="high-threshold" min="0" max="800" step="1">
+        <div class="form-actions">
+          <label class="btn btn-secondary file-btn">
+            Importar backup (.json)
+            <input type="file" id="import-input" accept="application/json" class="hidden">
+          </label>
         </div>
-      </div>
-      <button type="button" id="save-thresholds-btn" class="btn btn-secondary">Salvar faixa</button>
-    </section>
+      </section>
 
-    <section class="card card-muted">
-      <div class="card-head">
-        <h2>Backup dos dados</h2>
-        <p class="card-sub">Os registros ficam salvos apenas neste navegador. Faça backup periodicamente.</p>
-      </div>
-      <div class="form-actions">
-        <button type="button" id="export-btn" class="btn btn-secondary">Exportar backup (.json)</button>
-        <label class="btn btn-secondary file-btn">
-          Importar backup
-          <input type="file" id="import-input" accept="application/json" class="hidden">
-        </label>
-      </div>
-    </section>
+    </main>
 
-  </main>
+    <footer class="app-footer">Os dados ficam salvos apenas neste aparelho — nada é enviado para nenhum servidor.</footer>
+  </div>
 
-  <footer class="app-footer">Os dados ficam salvos apenas neste navegador — nada é enviado para nenhum servidor.</footer>
-
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="theme.js"></script>
+  <script src="storage.js"></script>
+  <script src="export.js"></script>
+  <script src="auth.js"></script>
   <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>

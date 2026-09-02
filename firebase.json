@@ -1,0 +1,18 @@
+{
+  "hosting": {
+    "public": "controle-glicemia",
+    "ignore": ["firebase.json", "**/.*", "!**/.well-known/**", "**/node_modules/**"],
+    "headers": [
+      {
+        "source": "/.well-known/assetlinks.json",
+        "headers": [{ "key": "Content-Type", "value": "application/json" }]
+      },
+      {
+        "source": "/sw.js",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      }
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false
+  }
+}

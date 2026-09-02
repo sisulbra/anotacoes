@@ -1,0 +1,20 @@
+{
+  "name": "Controle de Glicemia",
+  "short_name": "Glicemia",
+  "description": "Diário de medições de ponta de dedo para controle do diabetes, com registros por refeição, faixa de referência e exportação de dados.",
+  "id": "/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef2ee",
+  "theme_color": "#0b6e5c",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

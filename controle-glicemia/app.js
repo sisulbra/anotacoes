@@ -1,29 +1,8 @@
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "glicemia_readings_v1";
-  var SETTINGS_KEY = "glicemia_settings_v1";
-  var DEFAULT_SETTINGS = { low: 70, high: 180 };
+  var STATUS_PILL_LABELS = { low: "BAIXA", high: "ALTA", normal: "NA FAIXA" };
 
-  var CATEGORY_LABELS = {
-    cafe: "Café da manhã",
-    almoco: "Almoço",
-    jantar: "Jantar",
-    extra: "Extraordinário"
-  };
-
-  var MOMENT_LABELS = {
-    antes: "Antes da refeição",
-    depois: "Depois da refeição"
-  };
-
-  var STATUS_PILL_LABELS = {
-    low: "BAIXA",
-    high: "ALTA",
-    normal: "NA FAIXA"
-  };
-
-  var lcdPanel = document.getElementById("lcd-panel");
   var lcdContext = document.getElementById("lcd-context");
   var lcdStatus = document.getElementById("lcd-status");
   var lcdValue = document.getElementById("lcd-value");
@@ -50,41 +29,31 @@
   var historyList = document.getElementById("history-list");
   var filterCategory = document.getElementById("filter-category");
 
-  var exportBtn = document.getElementById("export-btn");
+  var exportJsonBtn = document.getElementById("export-json-btn");
+  var exportCsvBtn = document.getElementById("export-csv-btn");
+  var exportTxtBtn = document.getElementById("export-txt-btn");
+  var exportDocBtn = document.getElementById("export-doc-btn");
   var importInput = document.getElementById("import-input");
 
-  function loadReadings() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
+  var readings = [];
+  var settings = { low: 70, high: 180 };
+  var editingId = null;
+
+  function currentUserId() {
+    return Storage.activeUserId();
   }
 
-  function saveReadings(readings) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(readings));
+  function currentProfile() {
+    var id = currentUserId();
+    return id ? Storage.getProfile(id) : null;
   }
 
-  function loadSettings() {
-    try {
-      var raw = localStorage.getItem(SETTINGS_KEY);
-      var parsed = raw ? JSON.parse(raw) : null;
-      if (!parsed || typeof parsed.low !== "number" || typeof parsed.high !== "number") {
-        return Object.assign({}, DEFAULT_SETTINGS);
-      }
-      return parsed;
-    } catch (e) {
-      return Object.assign({}, DEFAULT_SETTINGS);
-    }
+  function persistReadings() {
+    Storage.saveReadings(currentUserId(), readings);
   }
 
-  function saveSettings(settings) {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  }
-
-  function makeId() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  function persistSettings() {
+    Storage.saveSettings(currentUserId(), settings);
   }
 
   function pad(n) {
@@ -101,14 +70,9 @@
     return pad(d.getHours()) + ":" + pad(d.getMinutes());
   }
 
-  function formatDateBR(dateStr) {
-    var parts = dateStr.split("-");
-    return parts[2] + "/" + parts[1] + "/" + parts[0];
+  function makeId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }
-
-  var readings = loadReadings();
-  var settings = loadSettings();
-  var editingId = null;
 
   function setDefaultFormDateTime() {
     dateInput.value = todayDateStr();
@@ -151,10 +115,41 @@
     }
   }
 
-  function classifyValue(value) {
-    if (value < settings.low) return "low";
-    if (value > settings.high) return "high";
-    return "normal";
+  function statBox(label, value) {
+    return (
+      '<div class="stat-box"><div class="stat-label">' +
+      Export.escapeHtml(label) +
+      '</div><div class="stat-value">' +
+      Export.escapeHtml(String(value)) +
+      "</div></div>"
+    );
+  }
+
+  function mostRecentReading() {
+    if (readings.length === 0) return null;
+    return readings.slice().sort(function (a, b) {
+      return (b.date + b.time).localeCompare(a.date + a.time);
+    })[0];
+  }
+
+  function renderLcd() {
+    var last = mostRecentReading();
+
+    if (!last) {
+      lcdContext.textContent = "Nenhum registro ainda";
+      lcdStatus.textContent = "SEM DADOS";
+      lcdStatus.className = "lcd-status-pill status-neutral";
+      lcdValue.textContent = "- - -";
+      lcdMeta.textContent = "Registre sua primeira medição abaixo";
+      return;
+    }
+
+    var cls = Export.classify(last.value, settings);
+    lcdContext.textContent = Export.typeLabel(last);
+    lcdStatus.textContent = STATUS_PILL_LABELS[cls];
+    lcdStatus.className = "lcd-status-pill status-" + cls;
+    lcdValue.textContent = last.value;
+    lcdMeta.textContent = Export.formatDateBR(last.date) + " às " + last.time;
   }
 
   function renderStats() {
@@ -169,50 +164,21 @@
     var highCount = 0;
     readings.forEach(function (r) {
       sum += r.value;
-      var c = classifyValue(r.value);
+      var c = Export.classify(r.value, settings);
       if (c === "low") lowCount++;
       if (c === "high") highCount++;
     });
     var avg = Math.round((sum / total) * 10) / 10;
-
-    var sorted = readings.slice().sort(function (a, b) {
-      return (b.date + b.time).localeCompare(a.date + a.time);
-    });
-    var last = sorted[0];
+    var last = mostRecentReading();
 
     var html = "";
     html += statBox("Total de registros", total);
     html += statBox("Média geral", avg + " mg/dL");
     html += statBox("Abaixo da faixa", lowCount);
     html += statBox("Acima da faixa", highCount);
-    html += statBox("Última medição", last.value + " mg/dL (" + formatDateBR(last.date) + " " + last.time + ")");
+    html += statBox("Última medição", last.value + " mg/dL (" + Export.formatDateBR(last.date) + " " + last.time + ")");
 
     statsEl.innerHTML = html;
-  }
-
-  function statBox(label, value) {
-    return (
-      '<div class="stat-box"><div class="stat-label">' +
-      escapeHtml(label) +
-      '</div><div class="stat-value">' +
-      escapeHtml(String(value)) +
-      "</div></div>"
-    );
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  function typeLabel(reading) {
-    if (reading.category === "extra") {
-      return CATEGORY_LABELS.extra;
-    }
-    return CATEGORY_LABELS[reading.category] + " — " + MOMENT_LABELS[reading.moment];
   }
 
   function renderHistory() {
@@ -234,14 +200,14 @@
 
     var html = list
       .map(function (r) {
-        var cls = classifyValue(r.value);
+        var cls = Export.classify(r.value, settings);
         var extras = [];
         if (r.insulin) extras.push("Insulina: " + r.insulin + " UI");
         var extrasHtml = extras.length
-          ? '<div class="reading-extra">' + escapeHtml(extras.join(" · ")) + "</div>"
+          ? '<div class="reading-extra">' + Export.escapeHtml(extras.join(" · ")) + "</div>"
           : "";
         var notesHtml = r.notes
-          ? '<div class="reading-notes">' + escapeHtml(r.notes) + "</div>"
+          ? '<div class="reading-notes">' + Export.escapeHtml(r.notes) + "</div>"
           : "";
 
         return (
@@ -250,12 +216,12 @@
           '">' +
           '<div class="reading-main">' +
           '<div class="reading-datetime">' +
-          formatDateBR(r.date) +
+          Export.formatDateBR(r.date) +
           " às " +
           r.time +
           "</div>" +
           '<div class="reading-type">' +
-          escapeHtml(typeLabel(r)) +
+          Export.escapeHtml(Export.typeLabel(r)) +
           "</div>" +
           '<span class="reading-value status-' +
           cls +
@@ -279,33 +245,6 @@
       .join("");
 
     historyList.innerHTML = html;
-  }
-
-  function mostRecentReading() {
-    if (readings.length === 0) return null;
-    return readings.slice().sort(function (a, b) {
-      return (b.date + b.time).localeCompare(a.date + a.time);
-    })[0];
-  }
-
-  function renderLcd() {
-    var last = mostRecentReading();
-
-    if (!last) {
-      lcdContext.textContent = "Nenhum registro ainda";
-      lcdStatus.textContent = "SEM DADOS";
-      lcdStatus.className = "lcd-status-pill status-neutral";
-      lcdValue.textContent = "- - -";
-      lcdMeta.textContent = "Registre sua primeira medição abaixo";
-      return;
-    }
-
-    var cls = classifyValue(last.value);
-    lcdContext.textContent = typeLabel(last);
-    lcdStatus.textContent = STATUS_PILL_LABELS[cls];
-    lcdStatus.className = "lcd-status-pill status-" + cls;
-    lcdValue.textContent = last.value;
-    lcdMeta.textContent = formatDateBR(last.date) + " às " + last.time;
   }
 
   function renderAll() {
@@ -360,7 +299,7 @@
       });
     }
 
-    saveReadings(readings);
+    persistReadings();
     renderAll();
     resetForm();
   });
@@ -404,7 +343,7 @@
         readings = readings.filter(function (r) {
           return r.id !== delId;
         });
-        saveReadings(readings);
+        persistReadings();
         if (editingId === delId) resetForm();
         renderAll();
       }
@@ -426,52 +365,40 @@
       return;
     }
     settings = { low: low, high: high };
-    saveSettings(settings);
+    persistSettings();
     renderAll();
   });
 
-  function offerBackupDownload(filename, jsonText) {
-    if (window.claude && typeof window.claude.use === "function") {
-      window.claude
-        .use("downloads")
-        .catch(function () {
-          return null;
-        })
-        .then(function (downloads) {
-          if (!downloads) {
-            downloadViaAnchor(filename, jsonText);
-            return;
-          }
-          downloads.save({ filename: filename, data: jsonText }).catch(function (err) {
-            if (!err || err.code !== "declined") {
-              alert("Não foi possível salvar o backup. Tente novamente.");
-            }
-          });
-        });
-      return;
-    }
-    downloadViaAnchor(filename, jsonText);
-  }
+  exportJsonBtn.addEventListener("click", function () {
+    Export.download(
+      "glicemia-" + Export.todayDateStr() + ".json",
+      Export.toJSON(readings, settings, currentProfile()),
+      "application/json"
+    );
+  });
 
-  function downloadViaAnchor(filename, jsonText) {
-    var blob = new Blob([jsonText], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+  exportCsvBtn.addEventListener("click", function () {
+    Export.download(
+      "glicemia-" + Export.todayDateStr() + ".csv",
+      Export.toCSV(readings, settings),
+      "text/csv;charset=utf-8"
+    );
+  });
 
-  exportBtn.addEventListener("click", function () {
-    var payload = {
-      exportedAt: new Date().toISOString(),
-      settings: settings,
-      readings: readings
-    };
-    offerBackupDownload("backup-glicemia-" + todayDateStr() + ".json", JSON.stringify(payload, null, 2));
+  exportTxtBtn.addEventListener("click", function () {
+    Export.download(
+      "glicemia-" + Export.todayDateStr() + ".txt",
+      Export.toTXT(readings, settings, currentProfile()),
+      "text/plain;charset=utf-8"
+    );
+  });
+
+  exportDocBtn.addEventListener("click", function () {
+    Export.download(
+      "glicemia-" + Export.todayDateStr() + ".doc",
+      Export.toDoc(readings, settings, currentProfile()),
+      "application/msword;charset=utf-8"
+    );
   });
 
   importInput.addEventListener("change", function () {
@@ -518,11 +445,11 @@
 
         if (data && data.settings && typeof data.settings.low === "number" && typeof data.settings.high === "number") {
           settings = data.settings;
-          saveSettings(settings);
+          persistSettings();
           loadThresholdInputs();
         }
 
-        saveReadings(readings);
+        persistReadings();
         renderAll();
         alert(added + " registro(s) importado(s) com sucesso.");
       } catch (err) {
@@ -533,8 +460,14 @@
     reader.readAsText(file);
   });
 
-  setDefaultFormDateTime();
-  updateMomentVisibility();
-  loadThresholdInputs();
-  renderAll();
+  window.GlicemiaApp = {
+    init: function () {
+      var userId = currentUserId();
+      readings = Storage.loadReadings(userId);
+      settings = Storage.loadSettings(userId);
+      resetForm();
+      loadThresholdInputs();
+      renderAll();
+    }
+  };
 })();
