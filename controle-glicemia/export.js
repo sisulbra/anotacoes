@@ -98,7 +98,7 @@
 
   function toTXT(readings, settings, profile) {
     var lines = [];
-    lines.push("CONTROLE DE GLICEMIA");
+    lines.push("VITAGLICO — DIÁRIO DE GLICEMIA");
     if (profile && profile.name) lines.push("Perfil: " + profile.name);
     lines.push("Exportado em: " + new Date().toLocaleString("pt-BR"));
     lines.push("Faixa de referência: " + settings.low + " a " + settings.high + " mg/dL");
@@ -140,9 +140,9 @@
 
     return (
       '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
-      "<head><meta charset='utf-8'><title>Controle de Glicemia</title></head>" +
+      "<head><meta charset='utf-8'><title>VitaGlico - Diário de Glicemia</title></head>" +
       "<body style='font-family:Calibri,Arial,sans-serif;'>" +
-      "<h1>Controle de Glicemia</h1>" +
+      "<h1>VitaGlico — Diário de Glicemia</h1>" +
       profileLine +
       "<p>Exportado em " + escapeHtml(new Date().toLocaleString("pt-BR")) + "</p>" +
       "<p>Faixa de referência: " + settings.low + " a " + settings.high + " mg/dL</p>" +

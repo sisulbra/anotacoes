@@ -1,6 +1,6 @@
 {
-  "name": "Controle de Glicemia",
-  "short_name": "Glicemia",
+  "name": "VitaGlico - Diário de Glicemia",
+  "short_name": "VitaGlico",
   "description": "Diário de medições de ponta de dedo para controle do diabetes, com registros por refeição, faixa de referência e exportação de dados.",
   "id": "/",
   "start_url": "./index.html",

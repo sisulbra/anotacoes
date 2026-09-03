@@ -1,4 +1,4 @@
-# Publicar o Controle de Glicemia na Google Play
+# Publicar o VitaGlico (Diário de Glicemia) na Google Play
 
 Este app é um PWA (site que funciona como app). Para virar um app de verdade
 na Play Store sem reescrever nada, usamos o caminho oficial do Google:
@@ -32,7 +32,7 @@ fazer por você.
 1. No [Google Cloud Console](https://console.cloud.google.com/apis/credentials),
    selecione o **mesmo projeto** criado no Firebase.
 2. Vá em **APIs e serviços → Tela de consentimento OAuth**: escolha
-   "Externo", preencha nome do app ("Controle de Glicemia"), e-mail de
+   "Externo", preencha nome do app ("VitaGlico"), e-mail de
    suporte e logo (pode usar `icons/icon-512.png`).
 3. Vá em **Credenciais → Criar credenciais → ID do cliente OAuth**.
    - Tipo de aplicativo: **Aplicativo da Web**.
