@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "REPLACE_WITH_YOUR_ANDROID_PACKAGE_NAME",
+      "package_name": "app.web.vitaglico_6415d.twa",
       "sha256_cert_fingerprints": [
-        "REPLACE:WITH:YOUR:APP:SIGNING:SHA256:FINGERPRINT"
+        "15:95:A0:30:45:D7:50:B1:BE:4B:D1:71:F0:1D:0C:40:46:E8:DD:30:7A:CC:7A:ED:AB:E0:40:7E:1D:03:B4:6F"
       ]
     }
   }
